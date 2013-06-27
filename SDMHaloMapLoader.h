@@ -87,6 +87,7 @@ struct Tag {
 struct MapTag {
 	uint32_t offset;
 	char *name;
+	struct GeneratedTag *plugin;
 } __attribute__ ((packed)) MapTag;
 
 struct Reflexive {

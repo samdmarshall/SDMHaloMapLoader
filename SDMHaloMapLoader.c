@@ -23,6 +23,13 @@
 
 struct MemoryBuffer* MapFileToBuffer(char *path);
 
+char* TagType(char tag[4]) {
+	char *tmp = malloc(4);
+	tmp = memcpy(tmp, tag, 4);
+	char rev[5] = {tmp[3], tmp[2], tmp[1], tmp[0], '\0'};
+	return rev;
+}
+
 struct VehicleRef* ParseVehicleRefs(struct HaloMap *map) {
 	return &map->buffer->data[map->scenario->vehicle.typeRef.offset];
 }
@@ -106,7 +113,13 @@ struct HaloMap* ParseHaloMapFromFileWithPlugins(char *mapPath, char *pluginsPath
 		for (uint32_t i = 0x0; i < map->index->tagCount; i++) {
 			map->tags[i].offset = map->buffer->offset;
 			struct Tag *tag = &map->buffer->data[map->buffer->offset];
-			map->tags[i].name = map->buffer->data[tag->stringOffset-map->mapData->mapMagic];			
+			map->tags[i].name = map->buffer->data[tag->stringOffset-map->mapData->mapMagic];
+			for (uint32_t j = 0x0; j < map->plugins->count; j++) {
+				if (memcmp(tag->classA, TagType(map->plugins->tags[j].class), 0x4)==0x0) {
+					map->tags[i].plugin = &map->plugins->tags[j];
+					break;
+				}
+			}
 			if (memcmp(tag->classA, "rncs", 0x4) == 0x0)  
 				map->mapData->scenarioOffset = map->tags[i].offset;
 			else if (memcmp(tag->classA, "gtam", 0x4) == 0x0)
