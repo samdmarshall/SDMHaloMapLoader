@@ -23,7 +23,7 @@
 
 struct MemoryBuffer* MapFileToBuffer(char *path);
 
-char* TagType(char tag[4]) {
+static inline char* TagType(char tag[4]) {
 	char rev[4] = {tag[3], tag[2], tag[1], tag[0]};
 	return rev;
 }
