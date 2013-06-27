@@ -24,9 +24,7 @@
 struct MemoryBuffer* MapFileToBuffer(char *path);
 
 char* TagType(char tag[4]) {
-	char *tmp = malloc(4);
-	tmp = memcpy(tmp, tag, 4);
-	char rev[5] = {tmp[3], tmp[2], tmp[1], tmp[0], '\0'};
+	char rev[4] = {tag[3], tag[2], tag[1], tag[0]};
 	return rev;
 }
 
