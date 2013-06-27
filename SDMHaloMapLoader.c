@@ -21,6 +21,8 @@
 
 #include "SDMHaloMapLoader.h"
 
+struct MemoryBuffer* MapFileToBuffer(char *path);
+
 struct VehicleRef* ParseVehicleRefs(struct HaloMap *map) {
 	return &map->buffer->data[map->scenario->vehicle.typeRef.offset];
 }
@@ -89,9 +91,10 @@ struct MemoryBuffer* MapFileToBuffer(char *path) {
 	return buffer;
 }
 
-struct HaloMap* ParseHaloMapFromFile(char *path) {
+struct HaloMap* ParseHaloMapFromFileWithPlugins(char *mapPath, char *pluginsPath) {
 	struct HaloMap *map = calloc(sizeof(struct HaloMap), 0x1);
-	map->buffer = MapFileToBuffer(path);
+	map->buffer = MapFileToBuffer(mapPath);
+	map->plugins = LoadPluginsAtPath(pluginsPath);
 	if (map->buffer) {
 		map->mapData = malloc(sizeof(struct MapData));
 		map->header = &map->buffer->data[map->buffer->offset];
@@ -104,7 +107,7 @@ struct HaloMap* ParseHaloMapFromFile(char *path) {
 			map->tags[i].offset = map->buffer->offset;
 			struct Tag *tag = &map->buffer->data[map->buffer->offset];
 			map->tags[i].name = map->buffer->data[tag->stringOffset-map->mapData->mapMagic];			
-			if (memcmp(tag->classA, "rncs", 0x4) == 0x0)
+			if (memcmp(tag->classA, "rncs", 0x4) == 0x0)  
 				map->mapData->scenarioOffset = map->tags[i].offset;
 			else if (memcmp(tag->classA, "gtam", 0x4) == 0x0)
 				map->mapData->globalsOffset = map->tags[i].offset;

@@ -19,11 +19,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "SDMPluginHandler.h"
 #ifdef _WIN32
 typedef unsigned __int32 uint32_t;
 #else
 #include <stdint.h>
 #endif
+
 
 #ifndef _SDM_HALO_MAP_LOADER_H_
 #define _SDM_HALO_MAP_LOADER_H_
@@ -172,6 +174,7 @@ struct HaloMap {
 	struct Index *index;
 	struct MapTag *tags;
 	struct ScenarioTag *scenario;
+	struct KnownTypes *plugins;
 } __attribute__ ((packed)) HaloMap;
 
 struct VehicleRef {
@@ -226,8 +229,7 @@ struct SkyboxRef {
 	char data[0x24];
 } __attribute__ ((packed)) ;
 
-struct HaloMap* ParseHaloMapFromFile(char *path);
-struct MemoryBuffer* MapFileToBuffer(char *path);
+struct HaloMap* ParseHaloMapFromFileWithPlugins(char *mapPath, char *pluginsPath);
 struct VehicleRef* ParseVehicleRefs(struct HaloMap *map);
 struct VehicleSpawn* ParseVehicleSpawns(struct HaloMap *map);
 struct BipedRef* ParseBipedRefs(struct HaloMap *map);
