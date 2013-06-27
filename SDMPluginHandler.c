@@ -29,37 +29,37 @@
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 
-enum DataTypeEnum {
-	DTdependency = 0,
-	DTstruct = 1,
-	DTenum16 = 2,
-	DTfloat = 3,
-	DTbitmask32 = 4,
-	DTshort = 5,
-	DTstring32 = 6,
-	DTchar = 7,
-	DTcolorRGB = 8,
-	DTbitmask8 = 9,
-	DTcolorARGB = 10,
-	DTfloatBounds = 11,
-	DTangle = 12,
-	DTRealV3d = 13,
-	DTEuler2d = 14,
-	DTindex = 15,
-	DTlong = 16,
-	DTbitmask16 = 17,
-	DTcolorbyte = 18,
-	DTcolorByteRGB = 19,
-	DTloneID = 20,
-	DTquaternion = 21,
-	DTshortBounds = 22,
+#define kKnownTypesCount 24
+
+static struct DataTypeFormat KnownDataTypeFormats[kKnownTypesCount] = {
+	{"dependency", 0x10},
+	{"string128", 0x80},
+	{"string32", 0x20},
+	{"string4", 0x4},
+	{"bitmask32", 0x4},
+	{"bitmask16", 0x2},
+	{"bitmask8", 0x1},
+	{"colorARGB", 0x10},
+	{"colorbyte", 0x4},
+	{"colorRGB", 0xc},
+	{"double", 0x8},
+	{"short", 0x1},
+	{"float", 0x4},
+	{"char", 0x1},
+	{"enum32", 0x4},
+	{"enum16", 0x2},
+	{"enum8", 0x1},
+	{"index", 0x2},
+	{"int32", 0x4},
+	{"int16", 0x2},
+	{"int8", 0x1},
+	{"loneID", 0x4},
+	{"struct", 0xc},
+	{"long", 0x4},
 };
 
-#define kKnownTypesCount 23
-static char *kKnownDataTypes[kKnownTypesCount] = {"dependency", "struct", "enum16", "float", "bitmask32", "short", "string32", "char", "colorRGB", "bitmask8", "colorARGB", "floatBounds", "angle", "RealV3d", "Euler2d", "index", "long", "bitmask16", "colorbyte", "colorByteRGB", "loneID", "quaternion", "shortBounds"};
-static uint32_t kKnownDataTypeSizes[kKnownTypesCount] = {0x10, 0x0, 0x2, 0x4, 0x4, 0x1, 0x20, 0x1, 0x12, 0x8, 0x8, 0x4, 0xc, 0x8, 0x2, 0x4, 0x2, 0x4, 0x12, 0x8, 0x30, 0x4};
-
 uint32_t GetSizeForData(xmlAttr *node);
+uint32_t GetValueForData(xmlAttr *node);
 uint32_t GetOffsetForData(xmlAttr *node);
 char* GetNameForData(xmlAttr *node);
 struct DataType BuildDataType(xmlNode *node);
@@ -70,6 +70,15 @@ uint32_t GetSizeForData(xmlAttr *node) {
 	xmlAttr *nodeAttr = NULL;
 	for (nodeAttr = node; nodeAttr; nodeAttr = nodeAttr->next)
 		if (strcmp((char *)nodeAttr->name, "size")==0)
+			offset = strtol((char *)nodeAttr->children->content, NULL, 10);
+	return offset;
+}
+
+uint32_t GetValueForData(xmlAttr *node) {
+	uint32_t offset = 0;
+	xmlAttr *nodeAttr = NULL;
+	for (nodeAttr = node; nodeAttr; nodeAttr = nodeAttr->next)
+		if (strcmp((char *)nodeAttr->name, "value")==0)
 			offset = strtol((char *)nodeAttr->children->content, NULL, 10);
 	return offset;
 }
@@ -94,20 +103,40 @@ char* GetNameForData(xmlAttr *node) {
 	return name;
 }
 
+bool HasValidType(xmlNode *node) {
+	bool result = false;
+	for (uint32_t typeNum = 0; typeNum < kKnownTypesCount; typeNum++) {
+		if (strcmp((char*)node->name, KnownDataTypeFormats[typeNum].name)==0) {
+			result = true;
+			break;
+		}
+	}
+	return result;
+}
+
 struct DataType BuildDataType(xmlNode *node) {
 	struct DataType type;
+	type.name = GetNameForData(node->properties);	
+	type.offset = GetOffsetForData(node->properties);
 	uint32_t typeNum;
 	for (typeNum = 0; typeNum < kKnownTypesCount; typeNum++) {
-		if (strcmp((char*)node->name, kKnownDataTypes[typeNum])==0) break;
+		if (strcmp((char*)node->name, KnownDataTypeFormats[typeNum].name)==0) break;
 	}
-	if (typeNum == DTstruct)
-		type.sizeInBytes = GetSizeForData(node->properties);
-	else
-		type.sizeInBytes = kKnownDataTypeSizes[typeNum];
-	
-	type.format = typeNum;	
-	type.offset = GetOffsetForData(node->properties);
-	type.name = GetNameForData(node->properties);	
+	type.format = &KnownDataTypeFormats[typeNum];
+	type.properties = malloc(sizeof(struct DataType));
+	type.propCount = 0;
+	if (node->children && typeNum == 22) {
+		xmlNode *props = NULL;
+		for (props = node->children; props; props = props->next) {
+			if (props->type == XML_ELEMENT_NODE) {
+				if (HasValidType(props)) {
+					type.properties = realloc(type.properties, sizeof(struct DataType)*(type.propCount+1));
+					type.properties[type.propCount] = BuildDataType(props);
+					type.propCount++;
+				}
+			}
+		}
+	}
 	return type;
 }
 
@@ -118,12 +147,14 @@ struct GeneratedTag GenerateTagFromPlugin(xmlNode *root) {
 		tag.class = strncpy(tag.class, (char*)root->properties->children->content, strlen((char*)root->properties->children->content));
 		tag.types = malloc(sizeof(struct DataType));
 		tag.count = 0;
-		xmlNode *cur_node = NULL;
-		for (cur_node = root->children; cur_node; cur_node = cur_node->next) {
+		xmlNode *cur_node = root->children;
+		while (cur_node = cur_node->next) {
 			if (cur_node->type == XML_ELEMENT_NODE) {
-				tag.types = realloc(tag.types, sizeof(struct DataType)*(tag.count+1));
-				tag.types[tag.count] = BuildDataType(cur_node);
-				tag.count++;
+				if (HasValidType(cur_node)) {
+					tag.types = realloc(tag.types, sizeof(struct DataType)*(tag.count+1));
+					tag.types[tag.count] = BuildDataType(cur_node);
+					tag.count++;
+				}
 			}
 		}
 	}

@@ -21,11 +21,17 @@
 
 #include <stdint.h>
 
+struct DataTypeFormat {
+	char *name;
+	uint32_t size;
+} __attribute__ ((packed)) DataTypeFormat;
+
 struct DataType {
 	char *name;
 	uint32_t offset;
-	uint32_t sizeInBytes;
-	uint32_t format;
+	struct DataTypeFormat *format;
+	struct DataType *properties;
+	uint32_t propCount;
 } __attribute__ ((packed)) DataType;
 
 struct GeneratedTag {
