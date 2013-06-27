@@ -29,7 +29,7 @@
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 
-#define kKnownTypesCount 24
+#define kKnownTypesCount 0x18
 
 static struct DataTypeFormat KnownDataTypeFormats[kKnownTypesCount] = {
 	{"dependency", 0x10},
@@ -66,29 +66,29 @@ struct DataType BuildDataType(xmlNode *node);
 struct GeneratedTag GenerateTagFromPlugin(xmlNode *root);
 
 uint32_t GetSizeForData(xmlAttr *node) {
-	uint32_t offset = 0;
+	uint32_t offset = 0x0;
 	xmlAttr *nodeAttr = NULL;
 	for (nodeAttr = node; nodeAttr; nodeAttr = nodeAttr->next)
-		if (strcmp((char *)nodeAttr->name, "size")==0)
-			offset = strtol((char *)nodeAttr->children->content, NULL, 10);
+		if (strcmp((char *)nodeAttr->name, "size")==0x0)
+			offset = strtol((char *)nodeAttr->children->content, NULL, 0xa);
 	return offset;
 }
 
 uint32_t GetValueForData(xmlAttr *node) {
-	uint32_t offset = 0;
+	uint32_t offset = 0x0;
 	xmlAttr *nodeAttr = NULL;
 	for (nodeAttr = node; nodeAttr; nodeAttr = nodeAttr->next)
-		if (strcmp((char *)nodeAttr->name, "value")==0)
-			offset = strtol((char *)nodeAttr->children->content, NULL, 10);
+		if (strcmp((char *)nodeAttr->name, "value")==0x0)
+			offset = strtol((char *)nodeAttr->children->content, NULL, 0xa);
 	return offset;
 }
 
 uint32_t GetOffsetForData(xmlAttr *node) {
-	uint32_t offset = 0;
+	uint32_t offset = 0x0;
 	xmlAttr *nodeAttr = NULL;
 	for (nodeAttr = node; nodeAttr; nodeAttr = nodeAttr->next)
-		if (strcmp((char *)nodeAttr->name, "offset")==0)
-			offset = strtol((char *)nodeAttr->children->content, NULL, 16);
+		if (strcmp((char *)nodeAttr->name, "offset")==0x0)
+			offset = strtol((char *)nodeAttr->children->content, NULL, 0x10);
 	return offset;
 }
 
@@ -96,7 +96,7 @@ char* GetNameForData(xmlAttr *node) {
 	char *name;
 	xmlAttr *nodeAttr = NULL;
 	for (nodeAttr = node; nodeAttr; nodeAttr = nodeAttr->next)
-		if (strcmp((char *)nodeAttr->name, "name")==0) {
+		if (strcmp((char *)nodeAttr->name, "name")==0x0) {
 			name = malloc(strlen((char *)nodeAttr->children->content));
 			name = strncpy(name, (char *)nodeAttr->children->content, strlen((char *)nodeAttr->children->content));
 		}
@@ -105,8 +105,8 @@ char* GetNameForData(xmlAttr *node) {
 
 bool HasValidType(xmlNode *node) {
 	bool result = false;
-	for (uint32_t typeNum = 0; typeNum < kKnownTypesCount; typeNum++) {
-		if (strcmp((char*)node->name, KnownDataTypeFormats[typeNum].name)==0) {
+	for (uint32_t typeNum = 0x0; typeNum < kKnownTypesCount; typeNum++) {
+		if (strcmp((char*)node->name, KnownDataTypeFormats[typeNum].name)==0x0) {
 			result = true;
 			break;
 		}
@@ -119,18 +119,18 @@ struct DataType BuildDataType(xmlNode *node) {
 	type.name = GetNameForData(node->properties);	
 	type.offset = GetOffsetForData(node->properties);
 	uint32_t typeNum;
-	for (typeNum = 0; typeNum < kKnownTypesCount; typeNum++) {
-		if (strcmp((char*)node->name, KnownDataTypeFormats[typeNum].name)==0) break;
+	for (typeNum = 0x0; typeNum < kKnownTypesCount; typeNum++) {
+		if (strcmp((char*)node->name, KnownDataTypeFormats[typeNum].name)==0x0) break;
 	}
 	type.format = &KnownDataTypeFormats[typeNum];
 	type.properties = malloc(sizeof(struct DataType));
-	type.propCount = 0;
-	if (node->children && typeNum == 22) {
+	type.propCount = 0x0;
+	if (node->children && typeNum == 0x16) {
 		xmlNode *props = NULL;
 		for (props = node->children; props; props = props->next) {
 			if (props->type == XML_ELEMENT_NODE) {
 				if (HasValidType(props)) {
-					type.properties = realloc(type.properties, sizeof(struct DataType)*(type.propCount+1));
+					type.properties = realloc(type.properties, sizeof(struct DataType)*(type.propCount+0x1));
 					type.properties[type.propCount] = BuildDataType(props);
 					type.propCount++;
 				}
@@ -146,7 +146,7 @@ struct GeneratedTag GenerateTagFromPlugin(xmlNode *root) {
 		tag.class = malloc(strlen((char*)root->properties->children->content));
 		tag.class = strncpy(tag.class, (char*)root->properties->children->content, strlen((char*)root->properties->children->content));
 		tag.types = malloc(sizeof(struct DataType));
-		tag.count = 0;
+		tag.count = 0x0;
 		xmlNode *cur_node = root->children;
 		while (cur_node = cur_node->next) {
 			if (cur_node->type == XML_ELEMENT_NODE) {
@@ -164,19 +164,19 @@ struct GeneratedTag GenerateTagFromPlugin(xmlNode *root) {
 struct KnownTypes* LoadPluginsAtPath(char *path) {
 	LIBXML_TEST_VERSION
 	struct KnownTypes *loadedTypes = malloc(sizeof(struct KnownTypes));
-	loadedTypes->count = 0;
-	loadedTypes->tags = (struct GeneratedTag*)calloc(1, sizeof(struct GeneratedTag));
-	char *full_file_name = malloc(strlen(path)+1);
+	loadedTypes->count = 0x0;
+	loadedTypes->tags = (struct GeneratedTag*)calloc(0x1, sizeof(struct GeneratedTag));
+	char *full_file_name = malloc(strlen(path)+0x1);
 	DIR *dir;
 	struct dirent *ent;
 	dir = opendir(path);
 	while ((ent = readdir(dir)) != NULL) {
 		char *file_name = ent->d_name;
-		if (file_name[0] != '.') {
-			full_file_name = realloc(full_file_name, strlen(path)+strlen(file_name)+2);
+		if (file_name[0x0] != '.') {
+			full_file_name = realloc(full_file_name, strlen(path)+strlen(file_name)+0x2);
 			strncpy(full_file_name, path, strlen(path));
-			strncpy(&full_file_name[strlen(path)], file_name, strlen(file_name)+1);
-			loadedTypes->tags = realloc(loadedTypes->tags, sizeof(struct GeneratedTag)*(loadedTypes->count+1));
+			strncpy(&full_file_name[strlen(path)], file_name, strlen(file_name)+0x1);
+			loadedTypes->tags = realloc(loadedTypes->tags, sizeof(struct GeneratedTag)*(loadedTypes->count+0x1));
 			loadedTypes->tags[loadedTypes->count] = BuildTagFromPluginAtPath(full_file_name);
 			loadedTypes->count++;			
 		}
@@ -191,10 +191,10 @@ struct GeneratedTag BuildTagFromPluginAtPath(char *path) {
 	struct GeneratedTag loadedTag = {0x0, 0x0};
 	if (path) {
 		xmlDoc *doc = NULL;
-		doc = xmlReadFile(path, NULL, 0);
+		doc = xmlReadFile(path, NULL, 0x0);
 		if (doc != NULL) {
 			xmlNode *root_element = xmlDocGetRootElement(doc);
-			if (strncmp(&path[strlen(path)-3], "ent", 3)==0)
+			if (strncmp(&path[strlen(path)-0x3], "ent", 0x3)==0)
 				loadedTag = GenerateTagFromPlugin(root_element);
 		}
 		xmlFreeDoc(doc);
