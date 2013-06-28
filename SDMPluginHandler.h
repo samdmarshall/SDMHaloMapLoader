@@ -19,7 +19,11 @@
 #ifndef _SDM_HALO_PLUGIN_HANDLER_H_
 #define _SDM_HALO_PLUGIN_HANDLER_H_
 
+#ifdef _WIN32
+typedef unsigned __int32 uint32_t;
+#else
 #include <stdint.h>
+#endif
 
 struct DataTypeFormat {
 	char *name;
