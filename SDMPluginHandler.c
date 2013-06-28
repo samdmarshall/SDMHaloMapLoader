@@ -97,7 +97,7 @@ char* GetNameForData(xmlAttr *node) {
 	xmlAttr *nodeAttr = NULL;
 	for (nodeAttr = node; nodeAttr; nodeAttr = nodeAttr->next)
 		if (strcmp((char *)nodeAttr->name, "name")==0x0) {
-			name = malloc(strlen((char *)nodeAttr->children->content));
+			name = calloc(strlen((char *)nodeAttr->children->content), 0x1);
 			name = strncpy(name, (char *)nodeAttr->children->content, strlen((char *)nodeAttr->children->content));
 		}
 	return name;
@@ -121,7 +121,7 @@ struct DataType BuildDataType(xmlNode *node) {
 	for (typeNum = 0x0; typeNum < kKnownTypesCount; typeNum++)
 		if (strcmp((char*)node->name, KnownDataTypeFormats[typeNum].name)==0x0) break;
 	type.format = &KnownDataTypeFormats[typeNum];
-	type.properties = malloc(sizeof(struct DataType));
+	type.properties = calloc(sizeof(struct DataType), 0x1);
 	type.propCount = 0x0;
 	if (node->children && typeNum == 0x16) {
 		xmlNode *props = NULL;
@@ -139,9 +139,9 @@ struct DataType BuildDataType(xmlNode *node) {
 struct GeneratedTag GenerateTagFromPlugin(xmlNode *root) {
 	struct GeneratedTag tag;
 	if (root->properties && root->properties->children) {
-		tag.class = malloc(strlen((char*)root->properties->children->content));
+		tag.class = calloc(strlen((char*)root->properties->children->content), 0x1);
 		tag.class = strncpy(tag.class, (char*)root->properties->children->content, strlen((char*)root->properties->children->content));
-		tag.types = malloc(sizeof(struct DataType));
+		tag.types = calloc(sizeof(struct DataType), 0x1);
 		tag.count = 0x0;
 		xmlNode *cur_node = root->children;
 		while ((cur_node = cur_node->next))
@@ -157,10 +157,10 @@ struct GeneratedTag GenerateTagFromPlugin(xmlNode *root) {
 
 struct KnownTypes* LoadPluginsAtPath(char *path) {
 	LIBXML_TEST_VERSION
-	struct KnownTypes *loadedTypes = malloc(sizeof(struct KnownTypes));
+	struct KnownTypes *loadedTypes = calloc(sizeof(struct KnownTypes), 0x1);
 	loadedTypes->count = 0x0;
 	loadedTypes->tags = (struct GeneratedTag*)calloc(0x1, sizeof(struct GeneratedTag));
-	char *full_file_name = malloc(strlen(path)+0x1);
+	char *full_file_name = calloc(strlen(path)+0x1, 0x1);
 	DIR *dir;
 	struct dirent *ent;
 	dir = opendir(path);

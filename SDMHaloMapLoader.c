@@ -88,7 +88,7 @@ struct MemoryBuffer* MapFileToBuffer(char *path) {
 			fseek(mapFile, 0x0, SEEK_END);
 			buffer->length = ftell(mapFile);
 			fseek(mapFile, 0x0, SEEK_SET);
-			buffer->data = malloc(buffer->length);
+			buffer->data = calloc(buffer->length, 0x1);
 			fread(buffer->data, buffer->length, 0x1, mapFile);
 		}
 		fclose(mapFile);
@@ -101,13 +101,13 @@ struct HaloMap* ParseHaloMapFromFileWithPlugins(char *mapPath, char *pluginsPath
 	map->buffer = MapFileToBuffer(mapPath);
 	map->plugins = LoadPluginsAtPath(pluginsPath);
 	if (map->buffer) {
-		map->mapData = malloc(sizeof(struct MapData));
+		map->mapData = calloc(sizeof(struct MapData), 0x1);
 		map->header = &map->buffer->data[map->buffer->offset];
 		map->buffer->offset += map->header->offset;
 		map->index = &map->buffer->data[map->buffer->offset];
 		map->buffer->offset += sizeof(struct Index);
 		map->mapData->mapMagic = (map->index->indexOffset - (map->header->offset+0x28));
-		map->tags = malloc(sizeof(struct MapTag)*map->index->tagCount);
+		map->tags = calloc(sizeof(struct MapTag)*map->index->tagCount, 0x1);
 		for (uint32_t i = 0x0; i < map->index->tagCount; i++) {
 			map->tags[i].offset = map->buffer->offset;
 			struct Tag *tag = &map->buffer->data[map->buffer->offset];
