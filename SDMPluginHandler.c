@@ -105,12 +105,11 @@ char* GetNameForData(xmlAttr *node) {
 
 bool HasValidType(xmlNode *node) {
 	bool result = false;
-	for (uint32_t typeNum = 0x0; typeNum < kKnownTypesCount; typeNum++) {
+	for (uint32_t typeNum = 0x0; typeNum < kKnownTypesCount; typeNum++)
 		if (strcmp((char*)node->name, KnownDataTypeFormats[typeNum].name)==0x0) {
 			result = true;
 			break;
 		}
-	}
 	return result;
 }
 
