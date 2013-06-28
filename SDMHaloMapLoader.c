@@ -29,55 +29,55 @@ static inline char* TagType(char tag[0x4]) {
 }
 
 struct VehicleRef* ParseVehicleRefs(struct HaloMap *map) {
-	return &map->buffer->data[map->scenario->vehicle.typeRef.offset];
+	return (struct VehicleRef*)&map->buffer->data[map->scenario->vehicle.typeRef.offset];
 }
 
 struct VehicleSpawn* ParseVehicleSpawns(struct HaloMap *map) {
-	return &map->buffer->data[map->scenario->vehicle.type.offset];
+	return (struct VehicleSpawn*)&map->buffer->data[map->scenario->vehicle.type.offset];
 }
 
 struct BipedRef* ParseBipedRefs(struct HaloMap *map) {
-	return &map->buffer->data[map->scenario->biped.typeRef.offset];
+	return (struct BipedRef*)&map->buffer->data[map->scenario->biped.typeRef.offset];
 }
 
 struct SceneryRef* ParseSceneryRefs(struct HaloMap *map) {
-	return &map->buffer->data[map->scenario->scenery.typeRef.offset];
+	return (struct SceneryRef*)&map->buffer->data[map->scenario->scenery.typeRef.offset];
 }
 
 struct ScenerySpawn* ParseScenerySpawns(struct HaloMap *map) {
-	return &map->buffer->data[map->scenario->scenery.type.offset];
+	return (struct ScenerySpawn*)&map->buffer->data[map->scenario->scenery.type.offset];
 }
 
 struct MPEquipmentSpawn* ParseMPEquipmentSpawns(struct HaloMap *map) {
-	return &map->buffer->data[map->scenario->mpEquipment.offset];
+	return (struct MPEquipmentSpawn*)&map->buffer->data[map->scenario->mpEquipment.offset];
 }
 
 struct PlayerSpawn* ParsePlayerSpawns(struct HaloMap *map) {
-	return &map->buffer->data[map->scenario->spawns.offset];
+	return (struct PlayerSpawn*)&map->buffer->data[map->scenario->spawns.offset];
 }
 
 struct MPFlags* ParseMPFlags(struct HaloMap *map) {
-	return &map->buffer->data[map->scenario->mpFlags.offset];
+	return (struct MPFlags*)&map->buffer->data[map->scenario->mpFlags.offset];
 }
 
 struct MachineRef* ParseMachineRefs(struct HaloMap *map) {
-	return &map->buffer->data[map->scenario->machine.typeRef.offset];
+	return (struct MachineRef*)&map->buffer->data[map->scenario->machine.typeRef.offset];
 }
 
 struct MachineSpawn* ParseMachineSpawns(struct HaloMap *map) {
-	return &map->buffer->data[map->scenario->machine.type.offset];
+	return (struct MachineSpawn*)&map->buffer->data[map->scenario->machine.type.offset];
 }
 
 struct DeviceGroup* ParseDeviceGroup(struct HaloMap *map) {
-	return &map->buffer->data[map->scenario->deviceGroups.offset];
+	return (struct DeviceGroup*)&map->buffer->data[map->scenario->deviceGroups.offset];
 }
 
 struct EncounterRef* ParseEncounters(struct HaloMap *map) {
-	return &map->buffer->data[map->scenario->encounters.offset];
+	return (struct EncounterRef*)&map->buffer->data[map->scenario->encounters.offset];
 }
 
 struct SkyboxRef* ParseSkyboxRefs(struct HaloMap *map) {
-	return &map->buffer->data[map->scenario->skybox.offset];
+	return (struct SkyboxRef*)&map->buffer->data[map->scenario->skybox.offset];
 }
 
 struct MemoryBuffer* MapFileToBuffer(char *path) {
@@ -102,15 +102,15 @@ struct HaloMap* ParseHaloMapFromFileWithPlugins(char *mapPath, char *pluginsPath
 	map->plugins = LoadPluginsAtPath(pluginsPath);
 	if (map->buffer) {
 		map->mapData = calloc(sizeof(struct MapData), 0x1);
-		map->header = &map->buffer->data[map->buffer->offset];
+		map->header = (struct Header*)(&map->buffer->data[map->buffer->offset]);
 		map->buffer->offset += map->header->offset;
-		map->index = &map->buffer->data[map->buffer->offset];
+		map->index = (struct Index*)(&map->buffer->data[map->buffer->offset]);
 		map->buffer->offset += sizeof(struct Index);
 		map->mapData->mapMagic = (map->index->indexOffset - (map->header->offset+0x28));
 		map->tags = calloc(sizeof(struct MapTag)*map->index->tagCount, 0x1);
 		for (uint32_t i = 0x0; i < map->index->tagCount; i++) {
 			map->tags[i].offset = map->buffer->offset;
-			struct Tag *tag = &map->buffer->data[map->buffer->offset];
+			struct Tag *tag = (struct Tag*)(&map->buffer->data[map->buffer->offset]);
 			map->tags[i].name = &map->buffer->data[tag->stringOffset-map->mapData->mapMagic];
 			for (uint32_t j = 0x0; j < map->plugins->count; j++)
 				if (memcmp(tag->classA, TagType(map->plugins->tags[j].class), 0x4)==0x0) {
@@ -135,7 +135,7 @@ struct HaloMap* ParseHaloMapFromFileWithPlugins(char *mapPath, char *pluginsPath
 				map->mapData->itmcCount++;
 			map->buffer->offset += sizeof(struct Tag);			
 		}		
-		map->scenario = &map->buffer->data[map->mapData->scenarioOffset];
+		map->scenario = (struct ScenarioTag*)(&map->buffer->data[map->mapData->scenarioOffset]);
 		map->buffer->offset += (map->mapData->scenarioOffset + sizeof(struct ScenarioTag));
 	}
 	return map;
