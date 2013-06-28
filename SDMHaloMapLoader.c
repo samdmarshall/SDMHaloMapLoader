@@ -112,12 +112,11 @@ struct HaloMap* ParseHaloMapFromFileWithPlugins(char *mapPath, char *pluginsPath
 			map->tags[i].offset = map->buffer->offset;
 			struct Tag *tag = &map->buffer->data[map->buffer->offset];
 			map->tags[i].name = &map->buffer->data[tag->stringOffset-map->mapData->mapMagic];
-			for (uint32_t j = 0x0; j < map->plugins->count; j++) {
+			for (uint32_t j = 0x0; j < map->plugins->count; j++)
 				if (memcmp(tag->classA, TagType(map->plugins->tags[j].class), 0x4)==0x0) {
 					map->tags[i].plugin = &map->plugins->tags[j];
 					break;
 				}
-			}
 			if (memcmp(tag->classA, "rncs", 0x4) == 0x0)  
 				map->mapData->scenarioOffset = map->tags[i].offset;
 			else if (memcmp(tag->classA, "gtam", 0x4) == 0x0)
