@@ -148,7 +148,7 @@ struct GeneratedTag GenerateTagFromPlugin(xmlNode *root) {
 		tag.types = malloc(sizeof(struct DataType));
 		tag.count = 0x0;
 		xmlNode *cur_node = root->children;
-		while (cur_node = cur_node->next) {
+		while ((cur_node = cur_node->next)) {
 			if (cur_node->type == XML_ELEMENT_NODE) {
 				if (HasValidType(cur_node)) {
 					tag.types = realloc(tag.types, sizeof(struct DataType)*(tag.count+1));
