@@ -83,7 +83,7 @@ struct SkyboxRef* ParseSkyboxRefs(struct HaloMap *map) {
 struct MemoryBuffer* MapFileToBuffer(char *path) {
 	struct MemoryBuffer *buffer = calloc(sizeof(struct MemoryBuffer), 0x1);
 	if (path) {
-		FILE *mapFile = fopen(path, "r+");
+		FILE *mapFile = fopen(path, "r");
 		if (mapFile) {
 			fseek(mapFile, 0x0, SEEK_END);
 			buffer->length = ftell(mapFile);
