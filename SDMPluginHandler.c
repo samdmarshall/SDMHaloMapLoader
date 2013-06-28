@@ -119,23 +119,20 @@ struct DataType BuildDataType(xmlNode *node) {
 	type.name = GetNameForData(node->properties);	
 	type.offset = GetOffsetForData(node->properties);
 	uint32_t typeNum;
-	for (typeNum = 0x0; typeNum < kKnownTypesCount; typeNum++) {
+	for (typeNum = 0x0; typeNum < kKnownTypesCount; typeNum++)
 		if (strcmp((char*)node->name, KnownDataTypeFormats[typeNum].name)==0x0) break;
-	}
 	type.format = &KnownDataTypeFormats[typeNum];
 	type.properties = malloc(sizeof(struct DataType));
 	type.propCount = 0x0;
 	if (node->children && typeNum == 0x16) {
 		xmlNode *props = NULL;
-		for (props = node->children; props; props = props->next) {
-			if (props->type == XML_ELEMENT_NODE) {
+		for (props = node->children; props; props = props->next)
+			if (props->type == XML_ELEMENT_NODE)
 				if (HasValidType(props)) {
 					type.properties = realloc(type.properties, sizeof(struct DataType)*(type.propCount+0x1));
 					type.properties[type.propCount] = BuildDataType(props);
 					type.propCount++;
 				}
-			}
-		}
 	}
 	return type;
 }
@@ -148,15 +145,13 @@ struct GeneratedTag GenerateTagFromPlugin(xmlNode *root) {
 		tag.types = malloc(sizeof(struct DataType));
 		tag.count = 0x0;
 		xmlNode *cur_node = root->children;
-		while ((cur_node = cur_node->next)) {
-			if (cur_node->type == XML_ELEMENT_NODE) {
+		while ((cur_node = cur_node->next))
+			if (cur_node->type == XML_ELEMENT_NODE)
 				if (HasValidType(cur_node)) {
 					tag.types = realloc(tag.types, sizeof(struct DataType)*(tag.count+1));
 					tag.types[tag.count] = BuildDataType(cur_node);
 					tag.count++;
 				}
-			}
-		}
 	}
 	return tag;
 }
