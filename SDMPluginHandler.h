@@ -30,12 +30,19 @@ struct DataTypeFormat {
 	uint32_t size;
 } __attribute__ ((packed)) DataTypeFormat;
 
+struct DataValue {
+	char *name;
+	uint32_t value;
+} __attribute__ ((packed)) DataValue;
+
 struct DataType {
 	char *name;
 	uint32_t offset;
 	struct DataTypeFormat *format;
 	struct DataType *properties;
 	uint32_t propCount;
+	struct DataValue *values;
+	uint32_t valueCount;
 } __attribute__ ((packed)) DataType;
 
 struct GeneratedTag {

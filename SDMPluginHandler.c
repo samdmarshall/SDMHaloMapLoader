@@ -75,12 +75,12 @@ uint32_t GetSizeForData(xmlAttr *node) {
 }
 
 uint32_t GetValueForData(xmlAttr *node) {
-	uint32_t offset = 0x0;
+	uint32_t value = 0x0;
 	xmlAttr *nodeAttr = NULL;
 	for (nodeAttr = node; nodeAttr; nodeAttr = nodeAttr->next)
 		if (strcmp((char *)nodeAttr->name, "value")==0x0)
-			offset = strtol((char *)nodeAttr->children->content, NULL, 0xa);
-	return offset;
+			value = strtol((char *)nodeAttr->children->content, NULL, 0xa);
+	return value;
 }
 
 uint32_t GetOffsetForData(xmlAttr *node) {
@@ -113,6 +113,13 @@ bool HasValidType(xmlNode *node) {
 	return result;
 }
 
+struct DataValue BuildDataValue(xmlNode *node) {
+	struct DataValue value;
+	value.name = GetNameForData(node->properties);
+	value.value = GetValueForData(node->properties);
+	return value;
+}
+
 struct DataType BuildDataType(xmlNode *node) {
 	struct DataType type;
 	type.name = GetNameForData(node->properties);	
@@ -123,15 +130,27 @@ struct DataType BuildDataType(xmlNode *node) {
 	type.format = &KnownDataTypeFormats[typeNum];
 	type.properties = calloc(sizeof(struct DataType), 0x1);
 	type.propCount = 0x0;
-	if (node->children && typeNum == 0x16) {
+	type.values = calloc(sizeof(struct DataValue), 0x1);
+	type.valueCount = 0x0;
+	if (node->children) {
 		xmlNode *props = NULL;
-		for (props = node->children; props; props = props->next)
-			if (props->type == XML_ELEMENT_NODE)
-				if (HasValidType(props)) {
-					type.properties = realloc(type.properties, sizeof(struct DataType)*(type.propCount+0x1));
-					type.properties[type.propCount] = BuildDataType(props);
-					type.propCount++;
+		for (props = node->children; props; props = props->next) {
+			if (props->type == XML_ELEMENT_NODE) {
+				if (typeNum == 0x16) {
+					if (HasValidType(props)) {
+						type.properties = realloc(type.properties, sizeof(struct DataType)*(type.propCount+0x1));
+						type.properties[type.propCount] = BuildDataType(props);
+						type.propCount++;
+					}
+				} else if (typeNum == 0x4 || typeNum == 0x5 || typeNum == 0x6 || typeNum == 0xe || typeNum == 0xf || typeNum == 0x10) {
+					if (strcmp((char*)props->name, "option")==0x0) {
+						type.values = realloc(type.values, sizeof(struct DataValue)*(type.valueCount+0x1));
+						type.values[type.valueCount] = BuildDataValue(props);
+						type.valueCount++;
+					}
 				}
+			}
+		}
 	}
 	return type;
 }
