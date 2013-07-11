@@ -96,9 +96,9 @@ struct MemoryBuffer* MapFileToBuffer(char *path) {
 	return buffer;
 }
 
-struct HaloMap* ParseHaloMapFromFileWithPlugins(char *mapPath, char *pluginsPath) {
+struct HaloMap* ParseHaloMapFromBufferWithPlugins(MemoryBuffer *buffer, char *pluginsPath) {
 	struct HaloMap *map = calloc(sizeof(struct HaloMap), 0x1);
-	map->buffer = MapFileToBuffer(mapPath);
+	map->buffer = buffer;
 	map->plugins = LoadPluginsAtPath(pluginsPath);
 	if (map->buffer) {
 		map->mapData = calloc(sizeof(struct MapData), 0x1);
@@ -139,5 +139,9 @@ struct HaloMap* ParseHaloMapFromFileWithPlugins(char *mapPath, char *pluginsPath
 		map->buffer->offset += (map->mapData->scenarioOffset + sizeof(struct ScenarioTag));
 	}
 	return map;
+}
+
+struct HaloMap* ParseHaloMapFromFileWithPlugins(char *mapPath, char *pluginsPath) {
+	return ParseHaloMapFromBufferWithPlugins(MapFileToBuffer(mapPath), pluginsPath);
 }
 #endif

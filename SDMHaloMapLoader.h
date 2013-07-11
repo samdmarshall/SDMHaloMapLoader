@@ -230,6 +230,7 @@ struct SkyboxRef {
 	char data[0x24];
 } __attribute__ ((packed)) ;
 
+struct HaloMap* ParseHaloMapFromBufferWithPlugins(MemoryBuffer *buffer, char *pluginsPath);
 struct HaloMap* ParseHaloMapFromFileWithPlugins(char *mapPath, char *pluginsPath);
 struct VehicleRef* ParseVehicleRefs(struct HaloMap *map);
 struct VehicleSpawn* ParseVehicleSpawns(struct HaloMap *map);
