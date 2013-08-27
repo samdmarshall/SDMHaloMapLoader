@@ -66,12 +66,12 @@ struct DataType BuildDataType(xmlNode *node);
 struct GeneratedTag GenerateTagFromPlugin(xmlNode *root);
 
 uint32_t GetSizeForData(xmlAttr *node) {
-	uint32_t offset = 0x0;
+	uint32_t size = 0x0;
 	xmlAttr *nodeAttr = NULL;
 	for (nodeAttr = node; nodeAttr; nodeAttr = nodeAttr->next)
 		if (strcmp((char *)nodeAttr->name, "size")==0x0)
-			offset = strtol((char *)nodeAttr->children->content, NULL, 0xa);
-	return offset;
+			size = strtol((char *)nodeAttr->children->content, NULL, 0xa);
+	return size;
 }
 
 uint32_t GetValueForData(xmlAttr *node) {
@@ -123,7 +123,8 @@ struct DataValue BuildDataValue(xmlNode *node) {
 struct DataType BuildDataType(xmlNode *node) {
 	struct DataType type;
 	type.name = GetNameForData(node->properties);	
-	type.offset = GetOffsetForData(node->properties);
+	type.offset = GetOffsetForData(node->properties);	
+	type.size = GetSizeForData(node->properties);
 	uint32_t typeNum;
 	for (typeNum = 0x0; typeNum < kKnownTypesCount; typeNum++)
 		if (strcmp((char*)node->name, KnownDataTypeFormats[typeNum].name)==0x0) break;

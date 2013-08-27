@@ -43,6 +43,7 @@ struct DataType {
 	uint32_t propCount;
 	struct DataValue *values;
 	uint32_t valueCount;
+	uint32_t size;
 } __attribute__ ((packed)) DataType;
 
 struct GeneratedTag {
