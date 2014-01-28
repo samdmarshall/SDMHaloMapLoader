@@ -105,8 +105,8 @@ struct HaloMap* ParseHaloMapFromBufferWithPlugins(MemoryBuffer *buffer, char *pl
 		map->header = (struct Header*)(&map->buffer->data[map->buffer->offset]);
 		map->buffer->offset += map->header->offset;
 		map->index = (struct Index*)(&map->buffer->data[map->buffer->offset]);
-		map->buffer->offset += sizeof(struct Index);
-		map->mapData->mapMagic = (map->index->indexOffset - (map->header->offset+0x28));
+		map->mapData->mapMagic = (0x40440000 - map->header->offset);
+		map->buffer->offset = map->index->indexOffset - map->mapData->mapMagic;
 		map->tags = calloc(sizeof(struct MapTag)*map->index->tagCount, 0x1);
 		for (uint32_t i = 0x0; i < map->index->tagCount; i++) {
 			map->tags[i].offset = map->buffer->offset;
