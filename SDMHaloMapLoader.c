@@ -117,7 +117,7 @@ struct HaloMap* ParseHaloMapFromBufferWithPlugins(MemoryBuffer *buffer, char *pl
 					map->tags[i].plugin = &map->plugins->tags[j];
 					break;
 				}
-			if (memcmp(tag->classA, "rncs", 0x4) == 0x0)  
+			if (i == (map->index->baseId & 0xFFFF))
 				map->mapData->scenarioOffset = map->tags[i].offset;
 			else if (memcmp(tag->classA, "gtam", 0x4) == 0x0)
 				map->mapData->globalsOffset = map->tags[i].offset;
